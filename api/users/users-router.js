@@ -1,6 +1,6 @@
 const router = require("express").Router();
 const Users = require("./users-model.js");
-const { restricted, checkRoleType } = require("../auth/auth-middleware.js");
+//const { restricted, checkRoleType } = require("../auth/auth-middleware.js");
 
 /**
   [GET] /api/users
@@ -17,7 +17,7 @@ const { restricted, checkRoleType } = require("../auth/auth-middleware.js");
     }
   ]
  */
-router.get("/", restricted, (req, res, next) => { 
+router.get("/", (req, res, next) => { 
   // done for you
   Users.find()
     .then(users => {
@@ -41,7 +41,7 @@ router.get("/", restricted, (req, res, next) => {
     }
   ]
  */
-router.get("/:user_id", restricted, checkRoleType('admin'), (req, res, next) => { 
+router.get("/:user_id", (req, res, next) => { 
   // done for you
   Users.findById(req.params.user_id)
     .then(user => {

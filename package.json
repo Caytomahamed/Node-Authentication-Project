@@ -19,7 +19,7 @@
     "express": "^4.18.1",
     "helmet": "^5.0.2",
     "knex": "^2.0.0",
-    "sqlite3": "https://github.com/mapbox/node-sqlite3/archive/refs/tags/v4.2.0.tar.gz"
+    "sqlite3": "^5.0.8"
   },
   "repository": {
     "type": "git",
