@@ -1,6 +1,6 @@
 const router = require("express").Router();
 const Users = require("./users-model.js");
-//const { restricted, checkRoleType } = require("../auth/auth-middleware.js");
+const { restricted, checkRoleType } = require("../auth/auth-middleware.js");
 
 /**
   [GET] /api/users
@@ -17,7 +17,12 @@ const Users = require("./users-model.js");
     }
   ]
  */
-router.get("/", (req, res, next) => { 
+router.get("/", restricted,(req, res, next) => { 
+  console.log("req.session.user", req.session.user);
+  if(req.session.user == null){
+    res.status(430).json({ message: "You are not logged in" });
+    return;
+  }
   // done for you
   Users.find()
     .then(users => {
@@ -41,7 +46,7 @@ router.get("/", (req, res, next) => {
     }
   ]
  */
-router.get("/:user_id", (req, res, next) => { 
+router.get("/:user_id", restricted, checkRoleType,(req, res, next) => { 
   // done for you
   Users.findById(req.params.user_id)
     .then(user => {
