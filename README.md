@@ -10,7 +10,7 @@ Use `Node.js`, `Express` and `Knex` to build an API with authentication and auth
 
 You will complete the following tasks and do any extra wiring and package installation necessary for the app to compile.
 
-#### 1A - Database Access Functions
+#### 1A - Database Access Functions ✅
 
 Write the following user access functions inside `api/users/users-model.js`:
 
@@ -18,7 +18,7 @@ Write the following user access functions inside `api/users/users-model.js`:
 - [ ] `findBy`
 - [ ] `findById`
 
-#### 1B - Middleware Functions
+#### 1B - Middleware Functions 
 
 Write the following auth middlewares inside `api/auth/auth-middleware.js`:
 

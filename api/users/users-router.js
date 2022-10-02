@@ -1,7 +1,35 @@
 const router = require("express").Router();
 const Users = require("./users-model.js");
-const { restricted, checkRoleType } = require("../auth/auth-middleware.js");
+const { validateRoleName } = require("../auth/auth-middleware.js");
 
+router.get("/", (req, res) => {
+  // console.log("req.session.user", req.session.user);
+  // if (req.session.user == null) {
+  //   res.status(430).json({ message: "You are not logged in" });
+  //   return;
+  // }
+  // done for you
+  Users.find()
+    .then((users) => {
+      res.json(users);
+    })
+    .catch(erro => console.log(erro));
+});
+
+router.get("/:user_id", (req, res, next) => {
+  // done for you
+  Users.findById(req.params.user_id)
+    .then((user) => {
+      res.json(user);
+    })
+    .catch(next);
+});
+
+module.exports = router;
+
+//  TODO: DOCUMANTATION
+
+// NOTE: get all users
 /**
   [GET] /api/users
 
@@ -17,20 +45,8 @@ const { restricted, checkRoleType } = require("../auth/auth-middleware.js");
     }
   ]
  */
-router.get("/", restricted,(req, res, next) => { 
-  console.log("req.session.user", req.session.user);
-  if(req.session.user == null){
-    res.status(430).json({ message: "You are not logged in" });
-    return;
-  }
-  // done for you
-  Users.find()
-    .then(users => {
-      res.json(users);
-    })
-    .catch(next);
-});
 
+// NOTE: get by id
 /**
   [GET] /api/users/:user_id
 
@@ -46,13 +62,3 @@ router.get("/", restricted,(req, res, next) => {
     }
   ]
  */
-router.get("/:user_id", restricted, checkRoleType,(req, res, next) => { 
-  // done for you
-  Users.findById(req.params.user_id)
-    .then(user => {
-      res.json(user);
-    })
-    .catch(next);
-});
-
-module.exports = router;

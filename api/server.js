@@ -22,13 +22,13 @@ const sessionConfig = {
   name: "assigment",
   secret: process.env.JWT_SECRET,
   saveUninitialized: false,
-  resave: false,
+  resave: false,  
   cookie: {
-    maxAge: 1000 * 60 *2,
+    maxAge: 1000 * 60 * 2,
     httpOnly: true,
     secret: false,
-  },
-};
+  }, 
+}; 
 
 server.use(session(sessionConfig));
 

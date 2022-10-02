@@ -1,36 +1,39 @@
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const router = require("express").Router();
-const { checkUsernameExists, validateRoleName } = require("./auth-middleware");
+const { validateRoleName } = require("./auth-middleware");
 // require JWT_SECRET from .env file // use this secret!
 const users = require("../users/users-model.js");
 
-router.post("/register", validateRoleName, async (req, res, next) => {
+router.post("/register", validateRoleName,async (req, res, next) => {
   /**
     [POST] /api/auth/register { "username": "anna", "password": "1234", "role_name": "team lead" }
-
+ 
     response:
     status 201
     {
       "user"_id: 3,
       "username": "anna",
       "role_name": "team lead"
-    }
+    } 
    */
 
   try {
-    const { username, password, role_name } = req.body;
+    // const role_name = req.body.role_name || req.role_name;
+    const { username, password,role_name} = req.body;
     const hash = bcrypt.hashSync(password, 10);
 
-    await users.add({ username, password: hash, role_name });
-    res.status(201).json({ message: `you are now registered,${username}` });
+    const u = await users.add({ username, password: hash, role_name });
+    
+    res.status(201).json({ message: `you are now registered, ${username}` });
   } catch (error) {
     res.status(500).json({ message: `Error registering user ${error}` });
+    console.log(error); 
     next(error);
   }
 });
 
-router.post("/login", checkUsernameExists, async (req, res, next) => {
+router.post("/login", async (req, res, next) => {
   /**
     [POST] /api/auth/login { "username": "Hamdi", "password": "1234" }
 
@@ -60,7 +63,7 @@ router.post("/login", checkUsernameExists, async (req, res, next) => {
     }
 
     req.session.user = existUser;
-    
+
     const token = generateToken(existUser);
 
     res.status(200).json({ message: `${username} is back!`, token });
@@ -76,14 +79,13 @@ const generateToken = (user) => {
     username: user.username,
     role_name: user.role_name,
   };
-  
+
   const options = {
     expiresIn: "2m",
   };
-  
-  return jwt.sign(payload, process.env.JWT_SECRET, options);
-}
 
+  return jwt.sign(payload, process.env.JWT_SECRET, options);
+};
 
 router.get("/logout", (req, res, next) => {
   /**
@@ -103,10 +105,11 @@ router.get("/logout", (req, res, next) => {
   const username = req.session.user.username;
 
   req.session.destroy((erro) => {
-    if (erro != null) {
+    if (erro) {
       res.status(500).json({ message: "Error logging out" });
       return;
     }
+
     res.status(200).json({ message: `${username} has been logged out` });
   });
 });
