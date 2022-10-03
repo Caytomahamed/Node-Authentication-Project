@@ -1,69 +1,49 @@
 // require JWT_SECRET from .env file // use this secret!
+require("dotenv").config();
 // require DB to get the user information
 const users = require("../users/users-model.js");
-require("dotenv").config();
 
 const jwt = require("jsonwebtoken");
 
 const restricted = (req, res, next) => {
-  /*
-    If the user does not provide a token in the Authorization header:
-    status 401
-    {
-      "message": "Token required"
-    }
-
-    If the provided token does not verify:
-    status 401
-    {
-      "message": "Token invalid"
-    }
-
-    Put the decoded token in the req object, to make life easier for middlewares downstream!
-  */
-
   // destructed token
   const token = req.headers.authorization;
 
   // verify token
-
   if (token) {
     jwt.verify(token, process.env.JWT_SECRET, async (error, decoded) => {
       if (error != null) {
         res.status(401).json({ message: `access restrict ${error}` });
         return;
       }
+      const user = await users.findById(decoded.subject);
 
-      const user = await users.findById(decoded.subject).first();
       if (user == null) {
         res.status(401).json({ message: "access restrict" });
         return;
+      } else {
+        req.decodedJwt = decoded;
+        next();
       }
-      req.decodedJwt = decoded;
-      next();
     });
+  } else {
+    res.status(400).json({ message: "no token, no access" });
   }
 };
 
 const checkRoleType = (role_name) => (req, res, next) => {
-  /*
-    If the user does not provide a token in the Authorization header with a role_name
-    inside its payload matching the role_name passed to this function as its argument:
-    status 403
-    {
-      "message": "This is not for you"
-    }
-
-    Pull the decoded token from the req object, to avoid verifying it again!
-  */
-
   try {
-    if (req.decoded.role_name !== role_name) {
+    const decoded = req.decodedJwt;
+    if (decoded.role_name !== role_name) {
       res.status(403).json({ message: "This is not for you" });
+      return;
+    } else {
+      req.decodedJwt = decoded;
+      next();
     }
-    req.decoded = req.decoded;
-    next();
-  } catch (error) {}
+  } catch (error) {
+    next(error);
+  }
 };
 
 const checkUsernameExists = async (req, res, next) => {
@@ -71,7 +51,7 @@ const checkUsernameExists = async (req, res, next) => {
     const { username } = req.body;
     const user = await users.findBy({ username }).first();
 
-    if (user === undefined) {
+    if (!user) {
       res.status(401).json({ message: "Invalid credentials" });
       return;
     }
@@ -83,8 +63,6 @@ const checkUsernameExists = async (req, res, next) => {
 };
 
 const validateRoleName = (req, res, next) => {
-  let { role_name } = req.body;
-
   try {
     if (req.body.role_name) {
       req.body.role_name = req.body.role_name.trim();
@@ -115,6 +93,35 @@ module.exports = {
 };
 
 // TODO:
+
+// NOTE: restricted
+/*
+    If the user does not provide a token in the Authorization header:
+    status 401
+    {
+      "message": "Token required"
+    }
+
+    If the provided token does not verify:
+    status 401
+    {
+      "message": "Token invalid"
+    }
+
+    Put the decoded token in the req object, to make life easier for middlewares downstream!
+  */
+
+// NOTE:checkRoleType
+/*
+    If the user does not provide a token in the Authorization header with a role_name
+    inside its payload matching the role_name passed to this function as its argument:
+    status 403
+    {
+      "message": "This is not for you"
+    }
+
+    Pull the decoded token from the req object, to avoid verifying it again!
+  */
 
 // NOTE: checkUsernameExists,
 /*

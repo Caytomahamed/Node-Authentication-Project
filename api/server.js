@@ -21,22 +21,22 @@ const server = express();
 const sessionConfig = {
   name: "assigment",
   secret: process.env.JWT_SECRET,
-  saveUninitialized: false,
-  resave: false,  
+  saveUninitialized: false, 
+  resave: false,
   cookie: {
-    maxAge: 1000 * 60 * 2,
+    maxAge: 1000 * 60 * 60 * 24,
     httpOnly: true,
     secret: false,
-  }, 
-}; 
+  },
+};
 
 server.use(session(sessionConfig));
 
 server.use(helmet());
 server.use(express.json());
-server.use(cors());
+server.use(cors()); 
 
 server.use("/api/auth", authRouter);
-server.use("/api/users", usersRouter);
-
+server.use("/api/users", usersRouter); 
+  
 module.exports = server;
